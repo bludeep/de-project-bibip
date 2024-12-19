@@ -9,7 +9,6 @@ class CarService:
     def add_model(self, model: Model) -> Model:
         file = open('D:/DEV/de-project-bibip/tables/models.txt', 'a+')
         new_value = str(model).replace(' ', ';')
-        idx = 0
         # Проверка наличия дубликата перед записью
         with open('D:/DEV/de-project-bibip/tables/models.txt', 'r') as f:
             duplicate = f.readlines()
@@ -27,25 +26,53 @@ class CarService:
             'D:/DEV/de-project-bibip/tables/models_index.txt', 'a+')
 
         index_value = str(model).split()[0].split('=')[-1]
-        # Проверка наличия дубликата для index.txt перед записью
-        duplicate_index = file_index.readlines()
-        for line_index in duplicate_index:
-            idx += 1
-            if index_value.strip() == line_index.strip():
-                file_index.close()
-                return model
-        file_index.write(f'{idx} {index_value}\n')
+        file_index.write(f'{len(duplicate)+1} {index_value}\n')
         file_index.close()
 
         return model
 
     # Задание 1. Сохранение автомобилей и моделей
     def add_car(self, car: Car) -> Car:
-        raise NotImplementedError
+        file = open('D:/DEV/de-project-bibip/tables/cars.txt', 'a+')
+        new_value = str(car).replace(' ', ';')
+        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+            duplicate = f.readlines()
+            f.close()
+        for line in duplicate:
+            line = line.strip()
+            new_value = new_value.strip()
+            if new_value == line:
+                file.close()
+                return car
+        file.write(f'{new_value}\n')
+        file.close()
+
+        file_index = open(
+            'D:/DEV/de-project-bibip/tables/cars_index.txt', 'a+')
+
+        index_value = str(car).split()[0].split('=')[-1]
+        file_index.write(f'{len(duplicate)+1} {index_value}\n')
+        file_index.close()
+
+        return car
 
     # Задание 2. Сохранение продаж.
     def sell_car(self, sale: Sale) -> Car:
-        raise NotImplementedError
+        list_vin = []
+        file_index = open(
+            'D:/DEV/de-project-bibip/tables/sales_index.txt', 'r')
+        index = file_index.readlines()[0]
+        for i in index:
+            if i not in list_vin:
+                list_vin.append(i)
+                print(i)
+                print(type(i))
+        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as cars:
+            pass
+
+
+
+        return sale
 
     # Задание 3. Доступные к продаже
     def get_cars(self, status: CarStatus) -> list[Car]:

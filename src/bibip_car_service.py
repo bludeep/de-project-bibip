@@ -7,7 +7,37 @@ class CarService:
 
     # Задание 1. Сохранение автомобилей и моделей
     def add_model(self, model: Model) -> Model:
-        raise NotImplementedError
+        file = open('D:/DEV/de-project-bibip/tables/models.txt', 'a+')
+        new_value = str(model).replace(' ', ';')
+        idx = 0
+        # Проверка наличия дубликата перед записью
+        with open('D:/DEV/de-project-bibip/tables/models.txt', 'r') as f:
+            duplicate = f.readlines()
+            f.close()
+        for line in duplicate:
+            line = line.strip()
+            new_value = new_value.strip()
+            if new_value == line:
+                file.close()
+                return model
+        file.write(f'{new_value}\n')
+        file.close()
+
+        file_index = open(
+            'D:/DEV/de-project-bibip/tables/models_index.txt', 'a+')
+
+        index_value = str(model).split()[0].split('=')[-1]
+        # Проверка наличия дубликата для index.txt перед записью
+        duplicate_index = file_index.readlines()
+        for line_index in duplicate_index:
+            idx += 1
+            if index_value.strip() == line_index.strip():
+                file_index.close()
+                return model
+        file_index.write(f'{idx} {index_value}\n')
+        file_index.close()
+
+        return model
 
     # Задание 1. Сохранение автомобилей и моделей
     def add_car(self, car: Car) -> Car:

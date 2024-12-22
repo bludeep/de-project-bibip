@@ -1,5 +1,7 @@
 from models import Car, CarFullInfo, CarStatus, Model, ModelSaleStats, Sale
 from datetime import datetime
+from decimal import Decimal
+
 
 class CarService:
     def __init__(self, root_directory_path: str) -> None:
@@ -49,7 +51,7 @@ class CarService:
             model = car.split()[1].split('=')[1]
             price = car.split()[2].split('=')[1].replace("'", '"')
             date = car[car.find('date'):car.find(car.split()[-2])
-                    ].replace(' ', '').split('=')[1]
+                       ].replace(' ', '').split('=')[1].replace('datetime.', '')
             date = f'{date[:-5]})'
             status = car.split('=')[5].split(':')[0].replace('<', '')
 
@@ -92,8 +94,9 @@ class CarService:
             sale_vin = raw.split(' ')[1].split(
                 '=')[1].replace('"', '').replace("'", '')
             date = raw[raw.find('sales_date'):raw.find(
-            ' cost')].replace(' ', '').split('=')[1]
-            date = f'{date[:-5]})'
+                ' cost')].replace(' ', '').split('=')[1]
+            date = f'{
+                date[:-5]})'.replace('datetime.datetime(', '').replace(')', '')
             cost = raw.split(' ')[-1].split('=')[1]
 
             # Формируем строку с данными о продаже
@@ -136,15 +139,16 @@ class CarService:
                             status = car.split(';')[-1].split('.')
                             new_stat = f'{status[0]}.sold'
                             cur_stat = car.split(';')[-1].strip()
-                            date = car.split(';')[3].split('(')[1].replace(')', '')
+                            date = car.split(';')[3].split(
+                                '(')[1].replace(')', '')
                             year, month, day = date.split(',')
                             if cur_stat != 'CarStatus.sold':
                                 result = f'{car[:car.find('CarStatus')]}{
                                     new_stat}'.ljust(500)
                                 c.write(f'{result}\n')
-    
 
     # Задание 3. Доступные к продаже
+
     def get_cars(self, status: CarStatus) -> list[Car]:
         status = str(status)
         available_list = []
@@ -156,26 +160,112 @@ class CarService:
             for line in lines:
                 vi = line.split(';')[0]
                 mod = line.split(';')[1]
-                pric = line.split(';')[2].replace('Decimal', '').replace('("', '').replace('")', '')
+                pric = Decimal(line.split(';')[2].replace(
+                    'Decimal', '').replace('("', '').replace('")', ''))
                 date = line.split(';')[3].split('(')[1].replace(')', '')
                 year, month, day = date.split(',')
                 stat = line.split(';')[-1].split('.')[1]
-                print(stat, status)
                 if stat == status:
                     available_list.append(
-                        Car(vin=str(vi), model=int(mod), price=pric, date_start=datetime(int(year), int(month), int(day)), status=stat))
+                        Car(vin=str(vi), model=int(mod), price=float(pric), date_start=datetime(int(year), int(month), int(day)), status=stat))
         available_list = sorted(available_list, key=lambda car: car.vin)
         return available_list
 
     # Задание 4. Детальная информация
     def get_car_info(self, vin: str) -> CarFullInfo | None:
-        raise NotImplementedError
+        line_number_car = None
+        sales_date = None
+        cost = None
+        dat = None
+        dat_1 = None
+
+        with open(
+                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r') as f:
+            entries = f.readlines()
+            entries = list(map(str.strip, entries))
+            for entry in entries:
+                car_vin = entry.split(';')[1]
+                if car_vin == vin:
+                    line_number_car = int(entry.split(';')[0])
+                    break
+        if line_number_car:
+            with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+                f.seek((line_number_car - 1) * 502)
+                lst_car = f.read(501).strip().split(';')
+                model_ind = lst_car[1]
+                dat = lst_car[3]
+                stat = lst_car[-1].split('.')[1]
+                pric = lst_car[2].replace('Decimal', '').replace(
+                    '("', '').replace('")', '').replace("'", '')
+                dat = lst_car[-2].strip().replace('datetime(',
+                                                  '').replace(')', '').split(',')
+                year_1, month_1, day_1 = dat[0], dat[1], dat[2]
+                dat = datetime(int(year_1), int(month_1), int(day_1))
+
+            with open('D:/DEV/de-project-bibip/tables/models_index.txt', 'r') as f:
+                entries = f.readlines()
+                entries = list(map(str.strip, entries))
+                for entry in entries:
+                    model_index = entry[entry.find(';') + 1:]
+                    if model_ind == model_index:
+                        line_number_model = int(entry[:entry.find(';')])
+                        break
+            with open('D:/DEV/de-project-bibip/tables/models.txt', 'r') as f:
+                f.seek((line_number_model - 1) * (502))
+                lst_model = f.read(501).strip().split(';')
+                mode = lst_model[1]
+                bran = lst_model[2]
+            if stat == 'sold':
+                with open('D:/DEV/de-project-bibip/tables/sales.txt', 'r') as f:
+                    entries = f.readlines()
+                    for entry in entries:
+                        entry = entry.strip().split(';')
+                        sales_date = entry[-2].strip().split(',')
+                        if vin == entry[1]:
+                            year, month, day = sales_date[0], sales_date[1], sales_date[2]
+                            dat_1 = datetime(int(year), int(month), int(day))
+                            cost = entry[3].replace('Decimal(', '').replace(
+                                "'", '').replace(')', '').replace("'", '')
+        else:
+            return None
+        return CarFullInfo(vin=car_vin, car_model_name=mode, car_model_brand=bran, price=int(pric), date_start=dat, status=stat, sales_date=dat_1, sales_cost=cost)
 
     # Задание 5. Обновление ключевого поля
+
     def update_vin(self, vin: str, new_vin: str) -> Car:
-        raise NotImplementedError
+        lines = None
+        with open(
+                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as f:
+            lines = f.readlines()
+            lines = list(map(str.strip, lines))
+
+            for line in lines:
+                ind = int(line.split(';')[0])
+                old_vin = line.split(';')[1].strip()
+                if vin == old_vin:
+                    with open(
+                            'D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as d:
+
+                        d.seek((ind - 1) * 501)
+                        cur_line = d.read(500)
+                        d.seek((ind - 1) * 501)
+
+                        cur_line = cur_line.split(';')
+                        new_vins = f'{new_vin};{cur_line[1]};{cur_line[2]};{
+                            cur_line[3]};{cur_line[4]}'.ljust(500)
+                        d.write(f'\n{new_vins}')
+                        new_ind = f'{ind};{new_vin}'
+                        lines[ind - 1] = new_ind
+        lines = sorted(lines, key=lambda x: int(x.split(';')[0]))
+        with open(
+                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as c:
+            for line in lines:
+                line = line.ljust(500)
+                c.truncate()
+                c.write(f'{line}\n')
 
     # Задание 6. Удаление продажи
+
     def revert_sale(self, sales_number: str) -> Car:
         raise NotImplementedError
 

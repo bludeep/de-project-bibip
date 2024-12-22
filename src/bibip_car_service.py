@@ -92,7 +92,8 @@ class CarService:
             sale_vin = raw.split(' ')[1].split(
                 '=')[1].replace('"', '').replace("'", '')
             date = raw[raw.find('sales_date'):raw.find(
-                ' cost')].replace(' ', '').split('=')[1]
+            ' cost')].replace(' ', '').split('=')[1]
+            date = f'{date[:-5]})'
             cost = raw.split(' ')[-1].split('=')[1]
 
             # Формируем строку с данными о продаже

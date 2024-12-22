@@ -150,14 +150,19 @@ class CarService:
     # Задание 3. Доступные к продаже
 
     def get_cars(self, status: CarStatus) -> list[Car]:
-        status = str(status)
-        available_list = []
-        with open(
-                'D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+        # Открываем файл с данными автомобилей
+        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+            # Считываем строки файла в список
             lines = f.readlines()
+            # Убираем символы новой строки из строк
             lines = list(map(str.strip, lines))
 
+            # Создаём пустой список для хранения доступных автомобилей
+            available_list = []
+
+            # Проходимся по каждой строке файла
             for line in lines:
+                # Разделяем строку на поля
                 vi = line.split(';')[0]
                 mod = line.split(';')[1]
                 pric = Decimal(line.split(';')[2].replace(
@@ -165,10 +170,20 @@ class CarService:
                 date = line.split(';')[3].split('(')[1].replace(')', '')
                 year, month, day = date.split(',')
                 stat = line.split(';')[-1].split('.')[1]
+
+                # Проверяем, соответствует ли статус автомобиля заданному
                 if stat == status:
+                    # Добавляем автомобиль в список доступных
                     available_list.append(
-                        Car(vin=str(vi), model=int(mod), price=float(pric), date_start=datetime(int(year), int(month), int(day)), status=stat))
+                        Car(vin=str(vi), 
+                            model=int(mod), 
+                            price=float(pric), 
+                            date_start=datetime(int(year), int(month), int(day)),
+                              status=stat))
+
+        # Сортируем список по VIN-номеру
         available_list = sorted(available_list, key=lambda car: car.vin)
+
         return available_list
 
     # Задание 4. Детальная информация
@@ -228,35 +243,49 @@ class CarService:
                                 "'", '').replace(')', '').replace("'", '')
         else:
             return None
-        return CarFullInfo(vin=car_vin, car_model_name=mode, car_model_brand=bran, price=int(pric), date_start=dat, status=stat, sales_date=dat_1, sales_cost=cost)
+        return CarFullInfo(vin=car_vin, car_model_name=mode, car_model_brand=bran, price=Decimal(pric), date_start=dat, status=stat, sales_date=dat_1, sales_cost=cost)
 
     # Задание 5. Обновление ключевого поля
 
     def update_vin(self, vin: str, new_vin: str) -> Car:
         lines = None
+
+        # Открываем файл с индексом автомобилей
         with open(
                 'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as f:
+            # Считываем строки файла в список
             lines = f.readlines()
+            # Убираем символы новой строки из строк и получаем список
             lines = list(map(str.strip, lines))
 
+            # Ищем строку и индекс с текущим VIN-номером
             for line in lines:
                 ind = int(line.split(';')[0])
                 old_vin = line.split(';')[1].strip()
                 if vin == old_vin:
+                    # Открываем файл с данными автомобиля
                     with open(
                             'D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as d:
 
+                        # Перемещаемся на нужную позицию в файле
                         d.seek((ind - 1) * 501)
+                        # Читаем строку
                         cur_line = d.read(500)
+                        cur_line = cur_line.split(';')
+                        # Перемещаемся на нужную позицию в файле
                         d.seek((ind - 1) * 501)
 
-                        cur_line = cur_line.split(';')
+
+                        # Записываем новый VIN-номер в файл
                         new_vins = f'{new_vin};{cur_line[1]};{cur_line[2]};{
                             cur_line[3]};{cur_line[4]}'.ljust(500)
                         d.write(f'\n{new_vins}')
+                        # Исправляем VIN в индексе
                         new_ind = f'{ind};{new_vin}'
                         lines[ind - 1] = new_ind
+        # Сортируем cars_index перед записью в файл                
         lines = sorted(lines, key=lambda x: int(x.split(';')[0]))
+        # Открываем cars_index для записи
         with open(
                 'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as c:
             for line in lines:

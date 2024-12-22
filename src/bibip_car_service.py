@@ -49,7 +49,7 @@ class CarService:
             model = car.split()[1].split('=')[1]
             price = car.split()[2].split('=')[1].replace("'", '"')
             date = car[car.find('date'):car.find(car.split()[-2])
-                       ].replace(' ', '').split('=')[1]
+                    ].replace(' ', '').split('=')[1]
             date = f'{date[:-5]})'
             status = car.split('=')[5].split(':')[0].replace('<', '')
 
@@ -62,11 +62,16 @@ class CarService:
                 # Читаем содержимое файла
                 lines = d.readlines()
 
-                # Удаляем лишние символы из строк и получаем список
-                lines = list(map(str.strip, lines))
+                list_vins = []
 
-                # Проверяем, есть ли данные о машине в файле
-                if final_str.strip() not in lines:
+                line_vin = list(map(str.strip, lines))
+
+                for line in line_vin:
+                    vins = line.split(';')[0]
+                    if line not in list_vins:
+                        list_vins.append(vins)
+
+                if vin not in list_vins:
                     f.write(f'{final_str}\n')
 
                     # Создаём индекс для машины
@@ -136,12 +141,7 @@ class CarService:
                                 result = f'{car[:car.find('CarStatus')]}{
                                     new_stat}'.ljust(500)
                                 c.write(f'{result}\n')
-
-        return (Car(vin=car.split(';')[0], 
-                   model=int(car.split(';')[1]), 
-                   price=car.split(';')[2].replace('Decimal', '').replace('("', '').replace('")', ''), 
-                   date_start=datetime(int(year), int(month), int(day)),
-                   status=car.split(';')[-1].split('.')[1].strip()))
+    
 
     # Задание 3. Доступные к продаже
     def get_cars(self, status: CarStatus) -> list[Car]:

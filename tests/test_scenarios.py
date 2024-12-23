@@ -139,6 +139,7 @@ class TestCarServiceScenarios:
         self._fill_initial_data(service, car_data, model_data)
 
         available_cars = [car for car in car_data if car.status == CarStatus.available]
+        available_cars = sorted([car for car in car_data if car.status == CarStatus.available], key=lambda car: car.vin)
 
         assert service.get_cars(CarStatus.available) == available_cars
 
@@ -181,6 +182,8 @@ class TestCarServiceScenarios:
         )
 
         assert service.get_car_info("KNAGM4A77D5316538") == full_info_with_sale
+        service.revert_sale("20240903#KNAGM4A77D5316538")
+
 
     def test_update_vin(self, tmpdir: str, car_data: list[Car], model_data: list[Model]):
         service = CarService(tmpdir)

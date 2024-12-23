@@ -10,7 +10,7 @@ class CarService:
     # Задание 1. Сохранение автомобилей и моделей
     def add_model(self, model: Model) -> Model:
         # Открываем файл для записи
-        with open('D:/DEV/de-project-bibip/tables/models.txt', 'a+') as f:
+        with open(self.root_directory_path + 'models.txt', 'a+') as f:
 
             # Разделяем строку на части
             id = str(model).split(' ')[0].split('=')[1]
@@ -22,7 +22,7 @@ class CarService:
             car_data = f'{id};{model_name};{brand}'.ljust(500)
 
             # Открываем файл для чтения
-            with open('D:/DEV/de-project-bibip/tables/models.txt', 'r+') as d:
+            with open(self.root_directory_path + 'models.txt', 'r+') as d:
 
                 # Читаем содержимое файла
                 lines = d.readlines()
@@ -35,7 +35,7 @@ class CarService:
                     f.write(f'{car_data}\n')
 
                     # Создаём индекс для модели
-                    with open('D:/DEV/de-project-bibip/tables/models_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'models_index.txt', 'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{id}'.ljust(500)
                         i.write(f'{result}\n')
@@ -43,7 +43,7 @@ class CarService:
     # Задание 1. Сохранение автомобилей и моделей
     def add_car(self, car: Car) -> Car:
         # Открываем файл для записи
-        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'a+') as f:
+        with open(self.root_directory_path + 'cars.txt', 'a+') as f:
 
             # Разделяем строку на части
             car = str(car)
@@ -59,7 +59,7 @@ class CarService:
             final_str = f'{vin};{model};{price};{date};{status}'.ljust(500)
 
             # Открываем файл для чтения
-            with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as d:
+            with open(self.root_directory_path + 'cars.txt', 'r+') as d:
 
                 # Читаем содержимое файла
                 lines = d.readlines()
@@ -77,7 +77,7 @@ class CarService:
                     f.write(f'{final_str}\n')
 
                     # Создаём индекс для машины
-                    with open('D:/DEV/de-project-bibip/tables/cars_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'cars_index.txt', 'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{vin}'.ljust(500)
                         i.write(f'{result}\n')
@@ -85,7 +85,7 @@ class CarService:
     # Задание 2. Сохранение продаж.
     def sell_car(self, sale: Sale) -> Car:
         # Открываем файл для записи
-        with open('D:/DEV/de-project-bibip/tables/sales.txt', 'a+') as f:
+        with open(self.root_directory_path + 'sales.txt', 'a+') as f:
 
             # Разделяем строку на части
             raw = str(sale)
@@ -103,7 +103,7 @@ class CarService:
             sale_data = f'{sale_num};{sale_vin};{date};{cost}'.ljust(500)
 
             # Открываем файл для чтения
-            with open('D:/DEV/de-project-bibip/tables/sales.txt', 'r+') as d:
+            with open(self.root_directory_path + 'sales.txt', 'r+') as d:
 
                 # Читаем содержимое файла
                 lines = d.readlines()
@@ -116,13 +116,13 @@ class CarService:
                     f.write(f'{sale_data}\n')
 
                     # Создаём индекс для продажи
-                    with open('D:/DEV/de-project-bibip/tables/sales_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'sales_index.txt', 'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{sale_num}'.ljust(500)
                         i.write(f'{result}\n')
 
             # Открываем файл для чтения и ищем индекс по vin автомобиля
-            with open('D:/DEV/de-project-bibip/tables/cars_index.txt', 'r') as t:
+            with open(self.root_directory_path + 'cars_index.txt', 'r') as t:
                 lines = t.readlines()
                 lines = list(map(str.strip, lines))
 
@@ -130,7 +130,7 @@ class CarService:
                     idx = int(line.split(';')[0])
                     vin = line.split(';')[1]
                     if vin == sale_vin:
-                        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as c:
+                        with open(self.root_directory_path + 'cars.txt', 'r+') as c:
                             c.seek((idx - 1) * 502)
                             car = c.read(501)
                             c.seek((idx - 1) * 502)
@@ -151,7 +151,7 @@ class CarService:
 
     def get_cars(self, status: CarStatus) -> list[Car]:
         # Открываем файл с данными автомобилей
-        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+        with open(self.root_directory_path + 'cars.txt', 'r') as f:
             # Считываем строки файла в список
             lines = f.readlines()
             # Убираем символы новой строки из строк
@@ -175,11 +175,12 @@ class CarService:
                 if stat == status:
                     # Добавляем автомобиль в список доступных
                     available_list.append(
-                        Car(vin=str(vi), 
-                            model=int(mod), 
-                            price=float(pric), 
-                            date_start=datetime(int(year), int(month), int(day)),
-                              status=stat))
+                        Car(vin=str(vi),
+                            model=int(mod),
+                            price=float(pric),
+                            date_start=datetime(
+                                int(year), int(month), int(day)),
+                            status=stat))
 
         # Сортируем список по VIN-номеру
         available_list = sorted(available_list, key=lambda car: car.vin)
@@ -195,7 +196,7 @@ class CarService:
         dat_1 = None
 
         with open(
-                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r') as f:
+                self.root_directory_path + 'cars_index.txt', 'r') as f:
             entries = f.readlines()
             entries = list(map(str.strip, entries))
             for entry in entries:
@@ -204,7 +205,7 @@ class CarService:
                     line_number_car = int(entry.split(';')[0])
                     break
         if line_number_car:
-            with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r') as f:
+            with open(self.root_directory_path + 'cars.txt', 'r') as f:
                 f.seek((line_number_car - 1) * 502)
                 lst_car = f.read(501).strip().split(';')
                 model_ind = lst_car[1]
@@ -217,7 +218,7 @@ class CarService:
                 year_1, month_1, day_1 = dat[0], dat[1], dat[2]
                 dat = datetime(int(year_1), int(month_1), int(day_1))
 
-            with open('D:/DEV/de-project-bibip/tables/models_index.txt', 'r') as f:
+            with open(self.root_directory_path + 'models_index.txt', 'r') as f:
                 entries = f.readlines()
                 entries = list(map(str.strip, entries))
                 for entry in entries:
@@ -225,13 +226,13 @@ class CarService:
                     if model_ind == model_index:
                         line_number_model = int(entry[:entry.find(';')])
                         break
-            with open('D:/DEV/de-project-bibip/tables/models.txt', 'r') as f:
+            with open(self.root_directory_path + 'models.txt', 'r') as f:
                 f.seek((line_number_model - 1) * (502))
                 lst_model = f.read(501).strip().split(';')
                 mode = lst_model[1]
                 bran = lst_model[2]
             if stat == 'sold':
-                with open('D:/DEV/de-project-bibip/tables/sales.txt', 'r') as f:
+                with open(self.root_directory_path + 'sales.txt', 'r') as f:
                     entries = f.readlines()
                     for entry in entries:
                         entry = entry.strip().split(';')
@@ -252,7 +253,7 @@ class CarService:
 
         # Открываем файл с индексом автомобилей
         with open(
-                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as f:
+                self.root_directory_path + 'cars_index.txt', 'r+') as f:
             # Считываем строки файла в список
             lines = f.readlines()
             # Убираем символы новой строки из строк и получаем список
@@ -265,7 +266,7 @@ class CarService:
                 if vin == old_vin:
                     # Открываем файл с данными автомобиля
                     with open(
-                            'D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as d:
+                            self.root_directory_path + 'cars.txt', 'r+') as d:
 
                         # Перемещаемся на нужную позицию в файле
                         d.seek((ind - 1) * 502)
@@ -275,7 +276,6 @@ class CarService:
                         # Перемещаемся на нужную позицию в файле
                         d.seek((ind - 1) * 502)
 
-
                         # Записываем новый VIN-номер в файл
                         new_vins = f'{new_vin};{cur_line[1]};{cur_line[2]};{
                             cur_line[3]};{cur_line[4]}'.ljust(500)
@@ -283,11 +283,11 @@ class CarService:
                         # Исправляем VIN в индексе
                         new_ind = f'{ind};{new_vin}'
                         lines[ind - 1] = new_ind
-        # Сортируем cars_index перед записью в файл                
+        # Сортируем cars_index перед записью в файл
         lines = sorted(lines, key=lambda x: int(x.split(';')[0]))
         # Открываем cars_index для записи
         with open(
-                'D:/DEV/de-project-bibip/tables/cars_index.txt', 'w+') as c:
+                self.root_directory_path + 'cars_index.txt', 'w+') as c:
             for line in lines:
                 line = line.ljust(500)
                 c.write(f'{line}\n')
@@ -301,7 +301,7 @@ class CarService:
         car_vin = None
 
         # Чтение данных из файла sales_index
-        with open('D:/DEV/de-project-bibip/tables/sales_index.txt', 'r+') as i:
+        with open(self.root_directory_path + 'sales_index.txt', 'r+') as i:
             lines = i.readlines()
             lines = list(map(str.strip, lines))
             for line in lines:
@@ -310,7 +310,7 @@ class CarService:
 
                 # Если номер продажи не совпадает с текущим номером добавляем валидные строки
                 if sales_number != cur_num:
-                    with open('D:/DEV/de-project-bibip/tables/sales.txt', 'r+') as d:
+                    with open(self.root_directory_path + 'sales.txt', 'r+') as d:
                         d.seek((ind - 1) * 501)
                         cur_line = d.read(500)
                         d.seek((ind - 1) * 501)
@@ -319,13 +319,13 @@ class CarService:
                         index_list.append(cur_num)
                 else:
                     # Поиск  автомобиля в файле sales и получение VIN-номера
-                    with open('D:/DEV/de-project-bibip/tables/sales.txt', 'r+') as d:
+                    with open(self.root_directory_path + 'sales.txt', 'r+') as d:
                         d.seek((ind - 1) * 501)
                         cur_line = d.read(500)
                         car_vin = cur_line.strip().split(';')[1]
 
             # Открытие файла cars_index для поиска индекса.
-            with open('D:/DEV/de-project-bibip/tables/cars_index.txt', 'r+') as c:
+            with open(self.root_directory_path + 'cars_index.txt', 'r+') as c:
                 cars = c.readlines()
                 for car in cars:
                     ind = int(car.split(';')[0])
@@ -333,7 +333,7 @@ class CarService:
                     # Если SALES_VIN == CAR_VIN то меняем статус
                     if vin == car_vin:
                         # Открытие файла cars для смены статуса
-                        with open('D:/DEV/de-project-bibip/tables/cars.txt', 'r+') as t:
+                        with open(self.root_directory_path + 'cars.txt', 'r+') as t:
                             t.seek((ind - 1) * 502)
                             car_line = t.read(501)
                             t.seek((ind - 1) * 502)
@@ -343,12 +343,12 @@ class CarService:
                             # Меняем статус автомобиля
                             t.write(f'{final_str}\n')
         # Запись данных в файл sales_index с новыми индексами
-        with open('D:/DEV/de-project-bibip/tables/sales_index.txt', 'w+') as i:
+        with open(self.root_directory_path + 'sales_index.txt', 'w+') as i:
             for ind, v in enumerate(index_list, 1):
                 new_str = f'{ind};{v}'.ljust(500)
                 i.write(f'{new_str}\n')
         # Запись валидных данных в таблицу sales
-        with open('D:/DEV/de-project-bibip/tables/sales.txt', 'w+') as i:
+        with open(self.root_directory_path + 'sales.txt', 'w+') as i:
             for v in sales_list:
                 new_str = f'{v}'.ljust(500)
                 i.write(f'{new_str}\n')
@@ -359,20 +359,19 @@ class CarService:
         result_list = dict()
         final_list = []
 
-
-        #### Получаем машины
-        cars_list = open('D:/DEV/de-project-bibip/tables/cars.txt', 'r+')
+        # Получаем машины
+        cars_list = open(self.root_directory_path + 'cars.txt', 'r+')
         cars = cars_list.readlines()
         cars_list.close()
         cars = list(map(str.strip, cars))
         # получаем продажи
-        sales_list = open('D:/DEV/de-project-bibip/tables/sales.txt', 'r+')
+        sales_list = open(self.root_directory_path + 'sales.txt', 'r+')
         sales = sales_list.readlines()
         sales_list.close()
         sales = list(map(str.strip, sales))
 
         # Получаем модели
-        models_list = open('D:/DEV/de-project-bibip/tables/models.txt', 'r+')
+        models_list = open(self.root_directory_path + 'models.txt', 'r+')
         models = models_list.readlines()
         models_list.close()
         models = list(map(str.strip, models))
@@ -388,14 +387,16 @@ class CarService:
                     for sale in sales:
                         sale = sale.strip().split(';')
                         sale_vin = sale[1]
-                        price = sale[3].replace("Decimal('", '').replace("')", '')
+                        price = sale[3].replace(
+                            "Decimal('", '').replace("')", '')
                         if sale_vin == vin:
                             top_models[model] = [Decimal(price)]
                 else:
                     for sale in sales:
                         sale = sale.strip().split(';')
                         sale_vin = sale[1]
-                        price = sale[3].replace("Decimal('", '').replace("')", '')
+                        price = sale[3].replace(
+                            "Decimal('", '').replace("')", '')
                         if sale_vin == vin:
                             top_models[model].append(Decimal(price))
         for line in models:
@@ -407,18 +408,16 @@ class CarService:
                 if key == ind:
                     result_list[f'{model};{brand};{len(values)}'] = values
 
-        
-        
         sorted_sales_dict = {}
         for k, v in result_list.items():
             total_price = len(v)
             sorted_sales_dict[k] = {'total_sales': total_price, 'prices': v}
-        sorted_sales_dict = sorted(sorted_sales_dict.items(), key=lambda x: (x[1]['total_sales'], x[1]['prices']), reverse=True)
-        
-        
+        sorted_sales_dict = sorted(sorted_sales_dict.items(), key=lambda x: (
+            x[1]['total_sales'], x[1]['prices']), reverse=True)
+
         for i in range(3):
             # model_name, brand_name, count = sorted_sales_dict[i].split(';')
             model_nam, brand_name, count = sorted_sales_dict[i][0].split(';')
-            final_list.append(ModelSaleStats(car_model_name=model_nam, brand=brand_name, sales_number=Decimal(count)))
+            final_list.append(ModelSaleStats(
+                car_model_name=model_nam, brand=brand_name, sales_number=Decimal(count)))
         return final_list
-

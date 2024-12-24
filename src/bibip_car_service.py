@@ -244,7 +244,15 @@ class CarService:
                                 "'", '').replace(')', '').replace("'", '')
         else:
             return None
-        return CarFullInfo(vin=car_vin, car_model_name=mode, car_model_brand=bran, price=Decimal(pric), date_start=dat, status=stat, sales_date=dat_1, sales_cost=cost)
+        return CarFullInfo(
+            vin=car_vin,
+            car_model_name=mode,
+            car_model_brand=bran,
+            price=Decimal(pric),
+            date_start=dat,
+            status=stat,
+            sales_date=dat_1,
+            sales_cost=cost)
 
     # Задание 5. Обновление ключевого поля
 
@@ -308,7 +316,8 @@ class CarService:
                 ind = int(line.split(';')[0])
                 cur_num = line.split(';')[1].strip()
 
-                # Если номер продажи не совпадает с текущим номером добавляем валидные строки
+                # Если номер продажи не совпадает с текущим номером добавляем
+                # валидные строки
                 if sales_number != cur_num:
                     with open(self.root_directory_path + 'sales.txt', 'r+') as d:
                         d.seek((ind - 1) * 501)
@@ -338,7 +347,10 @@ class CarService:
                             car_line = t.read(501)
                             t.seek((ind - 1) * 502)
                             car_line = car_line.strip().split(';')
-                            final_str = f'{car_line[0]};{car_line[1]};{car_line[2]};{
+                            final_str = f'{
+                                car_line[0]};{
+                                car_line[1]};{
+                                car_line[2]};{
                                 car_line[3]};CarStatus.available'.ljust(500)
                             # Меняем статус автомобиля
                             t.write(f'{final_str}\n')
@@ -418,6 +430,9 @@ class CarService:
         for i in range(3):
             # model_name, brand_name, count = sorted_sales_dict[i].split(';')
             model_nam, brand_name, count = sorted_sales_dict[i][0].split(';')
-            final_list.append(ModelSaleStats(
-                car_model_name=model_nam, brand=brand_name, sales_number=Decimal(count)))
+            final_list.append(
+                ModelSaleStats(
+                    car_model_name=model_nam,
+                    brand=brand_name,
+                    sales_number=Decimal(count)))
         return final_list

@@ -1,6 +1,7 @@
-from models import Car, CarFullInfo, CarStatus, Model, ModelSaleStats, Sale
 from datetime import datetime
 from decimal import Decimal
+
+from models import Car, CarFullInfo, CarStatus, Model, ModelSaleStats, Sale
 
 
 class CarService:
@@ -35,7 +36,8 @@ class CarService:
                     f.write(f'{car_data}\n')
 
                     # Создаём индекс для модели
-                    with open(self.root_directory_path + 'models_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'models_index.txt',
+                              'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{id}'.ljust(500)
                         i.write(f'{result}\n')
@@ -51,7 +53,8 @@ class CarService:
             model = car.split()[1].split('=')[1]
             price = car.split()[2].split('=')[1].replace("'", '"')
             date = car[car.find('date'):car.find(car.split()[-2])
-                       ].replace(' ', '').split('=')[1].replace('datetime.', '')
+                       ].replace(' ', '').split('=')[1].replace('datetime.',
+                                                                '')
             date = f'{date[:-5]})'
             status = car.split('=')[5].split(':')[0].replace('<', '')
 
@@ -77,7 +80,8 @@ class CarService:
                     f.write(f'{final_str}\n')
 
                     # Создаём индекс для машины
-                    with open(self.root_directory_path + 'cars_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'cars_index.txt',
+                              'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{vin}'.ljust(500)
                         i.write(f'{result}\n')
@@ -116,7 +120,8 @@ class CarService:
                     f.write(f'{sale_data}\n')
 
                     # Создаём индекс для продажи
-                    with open(self.root_directory_path + 'sales_index.txt', 'a+') as i:
+                    with open(self.root_directory_path + 'sales_index.txt',
+                              'a+') as i:
                         index = len(lines) + 1
                         result = f'{index};{sale_num}'.ljust(500)
                         i.write(f'{result}\n')
@@ -130,7 +135,8 @@ class CarService:
                     idx = int(line.split(';')[0])
                     vin = line.split(';')[1]
                     if vin == sale_vin:
-                        with open(self.root_directory_path + 'cars.txt', 'r+') as c:
+                        with open(self.root_directory_path + 'cars.txt',
+                                  'r+') as c:
                             c.seek((idx - 1) * 502)
                             car = c.read(501)
                             c.seek((idx - 1) * 502)
@@ -214,7 +220,8 @@ class CarService:
                 pric = lst_car[2].replace('Decimal', '').replace(
                     '("', '').replace('")', '').replace("'", '')
                 dat = lst_car[-2].strip().replace('datetime(',
-                                                  '').replace(')', '').split(',')
+                                                  '').replace(')',
+                                                              '').split(',')
                 year_1, month_1, day_1 = dat[0], dat[1], dat[2]
                 dat = datetime(int(year_1), int(month_1), int(day_1))
 
@@ -238,7 +245,9 @@ class CarService:
                         entry = entry.strip().split(';')
                         sales_date = entry[-2].strip().split(',')
                         if vin == entry[1]:
-                            year, month, day = sales_date[0], sales_date[1], sales_date[2]
+                            year = sales_date[0]
+                            month = sales_date[1]
+                            day = sales_date[2]
                             dat_1 = datetime(int(year), int(month), int(day))
                             cost = entry[3].replace('Decimal(', '').replace(
                                 "'", '').replace(')', '').replace("'", '')
@@ -319,7 +328,8 @@ class CarService:
                 # Если номер продажи не совпадает с текущим номером добавляем
                 # валидные строки
                 if sales_number != cur_num:
-                    with open(self.root_directory_path + 'sales.txt', 'r+') as d:
+                    with open(self.root_directory_path + 'sales.txt',
+                              'r+') as d:
                         d.seek((ind - 1) * 501)
                         cur_line = d.read(500)
                         d.seek((ind - 1) * 501)
@@ -328,7 +338,8 @@ class CarService:
                         index_list.append(cur_num)
                 else:
                     # Поиск  автомобиля в файле sales и получение VIN-номера
-                    with open(self.root_directory_path + 'sales.txt', 'r+') as d:
+                    with open(self.root_directory_path + 'sales.txt',
+                              'r+') as d:
                         d.seek((ind - 1) * 501)
                         cur_line = d.read(500)
                         car_vin = cur_line.strip().split(';')[1]
@@ -342,7 +353,8 @@ class CarService:
                     # Если SALES_VIN == CAR_VIN то меняем статус
                     if vin == car_vin:
                         # Открытие файла cars для смены статуса
-                        with open(self.root_directory_path + 'cars.txt', 'r+') as t:
+                        with open(self.root_directory_path + 'cars.txt',
+                                  'r+') as t:
                             t.seek((ind - 1) * 502)
                             car_line = t.read(501)
                             t.seek((ind - 1) * 502)
@@ -394,7 +406,8 @@ class CarService:
             model_2 = car[1]
             status = car[-1]
             vin = car[0]
-            if model == model_2 and status != 'CarStatus.available' and status != 'CarStatus.delivery':
+            if model == model_2 and status not in ('CarStatus.available',
+                                                   'CarStatus.delivery'):
                 if model not in top_models:
                     for sale in sales:
                         sale = sale.strip().split(';')
